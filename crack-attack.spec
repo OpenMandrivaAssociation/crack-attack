@@ -1,7 +1,7 @@
 Name:		crack-attack
 Summary:	Tetris like game
 Version:	1.1.14
-Release:	%mkrel 9
+Release:	%mkrel 10
 Url:		http://www.nongnu.org/crack-attack/
 Source0:	http://savannah.nongnu.org/download/crack-attack/%{name}-%{version}.tar.bz2
 Source11:	%{name}-48.png
@@ -10,7 +10,7 @@ Source13:	%{name}-16.png
 Source4:	crack-attack-scripts.tar.bz2
 Source5:	crack-attack-1.1.10-man6-page.bz2
 Patch3:		crack-attack-1.1.10-dont-segfault-i865g.patch
-Patch4:     crack-attack-1.1.14-ipv6-patch
+Patch4:     	crack-attack-1.1.14-ipv6-patch
 Group:		Games/Arcade
 License:	GPL
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
@@ -61,6 +61,9 @@ EOF
 install -m644 %{SOURCE11} -D $RPM_BUILD_ROOT%{_liconsdir}/%{name}.png
 install -m644 %{SOURCE12} -D $RPM_BUILD_ROOT%{_iconsdir}/%{name}.png
 install -m644 %{SOURCE13} -D $RPM_BUILD_ROOT%{_miconsdir}/%{name}.png
+install -m644 %{SOURCE11} -D $RPM_BUILD_ROOT%{_iconsdir}/hicolor/48x48/apps/%{name}.png
+install -m644 %{SOURCE12} -D $RPM_BUILD_ROOT%{_iconsdir}/hicolor/32x32/apps/%{name}.png
+install -m644 %{SOURCE13} -D $RPM_BUILD_ROOT%{_iconsdir}/hicolor/16x16/apps/%{name}.png
 
 rm -rf $RPM_BUILD_ROOT%{_mandir}/man1/crack-attack.1
 install -m644 doc/crack-attack.6 -D $RPM_BUILD_ROOT%{_mandir}/man6/crack-attack.6
@@ -94,5 +97,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_liconsdir}/%{name}.png
 %{_iconsdir}/%{name}.png
 %{_miconsdir}/%{name}.png
+%{_iconsdir}/hicolor/48x48/apps/%{name}.png
+%{_iconsdir}/hicolor/32x32/apps/%{name}.png
+%{_iconsdir}/hicolor/16x16/apps/%{name}.png
 %{_mandir}/man6/*
 
