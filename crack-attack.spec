@@ -19,7 +19,7 @@ BuildRequires:	SDL_mixer-devel
 BuildRequires:	SDL-devel
 BuildRequires:	libmesaglut-devel
 BuildRequires:	autoconf 
-BuildRequires:	gtk+2.0-devel
+BuildRequires:	gtk+2-devel
 BuildRequires:	desktop-file-utils
 Requires:	zenity
 Requires:	crack-attack-music
