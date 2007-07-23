@@ -1,7 +1,7 @@
 Name:		crack-attack
 Summary:	Tetris like game
 Version:	1.1.14
-Release:	%mkrel 11
+Release:	%mkrel 12
 Url:		http://www.nongnu.org/crack-attack/
 Source0:	http://savannah.nongnu.org/download/crack-attack/%{name}-%{version}.tar.bz2
 Source11:	%{name}-48.png
@@ -22,8 +22,8 @@ BuildRequires:	autoconf
 BuildRequires:	gtk+2-devel
 BuildRequires:	desktop-file-utils
 Requires:	zenity
-Requires:	crack-attack-music
-Requires:	crack-attack-sounds
+Suggests:	crack-attack-music
+Suggests:	crack-attack-sounds
 
 %description
 'Crack Attack!' is a free OpenGL game
