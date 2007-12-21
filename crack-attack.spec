@@ -13,6 +13,7 @@ Patch3:		crack-attack-1.1.10-dont-segfault-i865g.patch
 Patch4:     	crack-attack-1.1.14-ipv6-patch
 Group:		Games/Arcade
 License:	GPL
+BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 BuildRequires:	mesagl-devel 
 BuildRequires:	SDL_mixer-devel 
 BuildRequires:	SDL-devel
