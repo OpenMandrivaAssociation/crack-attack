@@ -58,6 +58,7 @@ install -m644 %{SOURCE13} -D $RPM_BUILD_ROOT%{_iconsdir}/hicolor/16x16/apps/%{na
 rm -rf $RPM_BUILD_ROOT%{_mandir}/man1/crack-attack.1
 install -m644 doc/crack-attack.6 -D $RPM_BUILD_ROOT%{_mandir}/man6/crack-attack.6
 
+perl -pi -e 's/\..*/ if /^Icon/' $RPM_BUILD_ROOT%{_datadir}/applications data/%{name}.desktop
 desktop-file-install --vendor="" \
   --remove-category="Application" \
   --remove-category="Games" \
