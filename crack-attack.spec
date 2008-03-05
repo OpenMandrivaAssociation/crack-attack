@@ -13,17 +13,16 @@ Patch3:		crack-attack-1.1.10-dont-segfault-i865g.patch
 Patch4:     	crack-attack-1.1.14-ipv6-patch
 Group:		Games/Arcade
 License:	GPL
-BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 BuildRequires:	mesagl-devel 
 BuildRequires:	SDL_mixer-devel 
 BuildRequires:	SDL-devel
 BuildRequires:	libmesaglut-devel
 BuildRequires:	autoconf 
 BuildRequires:	gtk+2-devel
-BuildRequires:	desktop-file-utils
 Requires:	zenity
 Suggests:	crack-attack-music
 Suggests:	crack-attack-sounds
+BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %description
 'Crack Attack!' is a free OpenGL game
@@ -46,28 +45,34 @@ autoreconf
 %make
 
 %install
-rm -rf $RPM_BUILD_ROOT
-%{makeinstall_std}
+rm -rf %{buildroot}
 
-install -D -m 755 crack-attack-{solo,create-server,join-server} $RPM_BUILD_ROOT%{_gamesbindir}/
+%makeinstall_std
 
-install -m644 %{SOURCE11} -D $RPM_BUILD_ROOT%{_iconsdir}/hicolor/48x48/apps/%{name}.png
-install -m644 %{SOURCE12} -D $RPM_BUILD_ROOT%{_iconsdir}/hicolor/32x32/apps/%{name}.png
-install -m644 %{SOURCE13} -D $RPM_BUILD_ROOT%{_iconsdir}/hicolor/16x16/apps/%{name}.png
+install -D -m 755 crack-attack-{solo,create-server,join-server} %{buildroot}%{_gamesbindir}/
 
-rm -rf $RPM_BUILD_ROOT%{_mandir}/man1/crack-attack.1
-install -m644 doc/crack-attack.6 -D $RPM_BUILD_ROOT%{_mandir}/man6/crack-attack.6
+install -m644 %{SOURCE11} -D %{buildroot}%{_iconsdir}/hicolor/48x48/apps/%{name}.png
+install -m644 %{SOURCE12} -D %{buildroot}%{_iconsdir}/hicolor/32x32/apps/%{name}.png
+install -m644 %{SOURCE13} -D %{buildroot}%{_iconsdir}/hicolor/16x16/apps/%{name}.png
 
-perl -pi -e 's/\..*/ if /^Icon/' $RPM_BUILD_ROOT%{_datadir}/applications data/%{name}.desktop
-desktop-file-install --vendor="" \
-  --remove-category="Application" \
-  --remove-category="Games" \
-  --add-category="Game" \
-  --add-category="ArcadeGame" \
-  --dir $RPM_BUILD_ROOT%{_datadir}/applications data/%{name}.desktop
+rm -rf %{buildroot}%{_mandir}/man1/crack-attack.1
+install -m644 doc/crack-attack.6 -D %{buildroot}%{_mandir}/man6/crack-attack.6
+
+install -d %{buildroot}%{_datadir}/applications
+cat > %{buildroot}%{_datadir}/applications/%{name}.desktop << EOF
+[Desktop Entry]
+Encoding=UTF-8
+Name=Crack Attack!
+Exec=crack-attack
+Icon=crack-attack
+Terminal=false
+Type=Application
+Categories=ArcadeGame;Game;
+StartupNotify=false
+EOF
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
 %post
 %update_menus
@@ -88,4 +93,3 @@ rm -rf $RPM_BUILD_ROOT
 %{_iconsdir}/hicolor/32x32/apps/%{name}.png
 %{_iconsdir}/hicolor/16x16/apps/%{name}.png
 %{_mandir}/man6/*
-
