@@ -11,6 +11,7 @@ Source4:	crack-attack-scripts.tar.bz2
 Source5:	crack-attack-1.1.10-man6-page.bz2
 Patch3:		crack-attack-1.1.10-dont-segfault-i865g.patch
 Patch4:     	crack-attack-1.1.14-ipv6-patch
+Patch5:         crack-attack-1.1.14-gcc43.patch
 Group:		Games/Arcade
 License:	GPL
 BuildRequires:	mesagl-devel 
@@ -33,6 +34,7 @@ based on the Super Nintendo classic Tetris Attack.
 %patch3 -p0
 # http://lists.gnu.org/archive/html/crack-attack-devel/2005-05/msg00002.html
 %patch4 -p0
+%patch5 -p1 -b .gcc43
 bzcat %{SOURCE5} > doc/crack-attack.6
 
 perl -pi -e "s|^CXXFLAGS.*|CXXFLAGS = $RPM_OPT_FLAGS -DNDEBUG|" src/Makefile*
