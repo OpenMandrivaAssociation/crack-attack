@@ -1,7 +1,7 @@
 Name:		crack-attack
 Summary:	Tetris like game
 Version:	1.1.14
-Release:	%mkrel 15
+Release:	%mkrel 16
 Url:		http://www.nongnu.org/crack-attack/
 Source0:	http://savannah.nongnu.org/download/crack-attack/%{name}-%{version}.tar.bz2
 Source11:	%{name}-48.png
