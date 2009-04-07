@@ -9,6 +9,7 @@ Source12:	%{name}-32.png
 Source13:	%{name}-16.png
 Source4:	crack-attack-scripts.tar.bz2
 Source5:	crack-attack-1.1.10-man6-page.bz2
+Patch0:		crack-attack-1.1.14-fix-str-fmt.patch
 Patch3:		crack-attack-1.1.14-dont-segfault-i865g.patch
 Patch4:     	crack-attack-1.1.14-ipv6-patch
 Patch5:         crack-attack-1.1.14-gcc43.patch
@@ -31,6 +32,7 @@ based on the Super Nintendo classic Tetris Attack.
 
 %prep
 %setup -q -a 4
+%patch0 -p0 -b .str
 %patch3 -p0 -b .seg
 # http://lists.gnu.org/archive/html/crack-attack-devel/2005-05/msg00002.html
 %patch4 -p0
