@@ -1,7 +1,7 @@
 Name:		crack-attack
 Summary:	Tetris like game
 Version:	1.1.14
-Release:	%mkrel 19
+Release:	%mkrel 20
 Url:		http://www.nongnu.org/crack-attack/
 Source0:	http://savannah.nongnu.org/download/crack-attack/%{name}-%{version}.tar.bz2
 Source11:	%{name}-48.png
@@ -13,13 +13,14 @@ Patch0:		crack-attack-1.1.14-fix-str-fmt.patch
 Patch3:		crack-attack-1.1.14-dont-segfault-i865g.patch
 Patch4:     	crack-attack-1.1.14-ipv6-patch
 Patch5:         crack-attack-1.1.14-gcc43.patch
+Patch6:		crack-attack-1.1.14-freeglut-init.patch
 Group:		Games/Arcade
 License:	GPL
-BuildRequires:	mesagl-devel 
-BuildRequires:	SDL_mixer-devel 
+BuildRequires:	libgl-devel
+BuildRequires:	SDL_mixer-devel
 BuildRequires:	SDL-devel
-BuildRequires:	libmesaglut-devel
-BuildRequires:	autoconf 
+BuildRequires:	libglut-devel
+BuildRequires:	autoconf
 BuildRequires:	gtk+2-devel
 Requires:	zenity
 Suggests:	crack-attack-music
@@ -37,6 +38,8 @@ based on the Super Nintendo classic Tetris Attack.
 # http://lists.gnu.org/archive/html/crack-attack-devel/2005-05/msg00002.html
 %patch4 -p0
 %patch5 -p1 -b .gcc43
+# This patch will be needed after we switch to freeglut:
+#%patch6 -p1
 bzcat %{SOURCE5} > doc/crack-attack.6
 
 perl -pi -e "s|^CXXFLAGS.*|CXXFLAGS = $RPM_OPT_FLAGS -DNDEBUG|" src/Makefile*
