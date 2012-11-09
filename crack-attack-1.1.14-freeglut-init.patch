@@ -1,0 +1,12 @@
+diff -Nrup crack-attack-1.1.14//src/Attack.cxx patched//src/Attack.cxx
+--- crack-attack-1.1.14//src/Attack.cxx	2011-02-22 14:04:16.786453001 -0300
++++ patched//src/Attack.cxx	2011-02-22 14:05:29.574453081 -0300
+@@ -86,6 +86,8 @@ int main ( int argc, char **argv )
+   player_name[0] = '\0';
+   host_name[0] = '\0';
+   port[0] = '\0';
++
++  glutInit(&argc, argv);
+   
+   parseCommandLine(argc, argv, mode, port, host_name, player_name, height, width);
+   run_crack_attack(mode, port, host_name, player_name, height, width);

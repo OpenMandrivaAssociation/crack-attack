@@ -1,0 +1,372 @@
+Index: src/Attack.cxx
+===================================================================
+--- src/Attack.cxx
++++ src/Attack.cxx	2005-08-04 20:36:09.000000000 +0200
+@@ -27,6 +27,7 @@
+ #include <cstring>
+ #include <cctype>
+ #include <sys/stat.h>
++#include <netdb.h>
+ 
+ #ifndef _WIN32
+ #  include <pwd.h>
+@@ -54,7 +55,7 @@
+ #include "gtk-gui/gui_main.h"
+ #endif
+ 
+-#define GC_HOST_NAME_SIZE (256)
++///#define GC_HOST_NAME_SIZE (256)
+ 
+ /*
+  * Documentation
+@@ -77,12 +78,15 @@
+   if (argc <= 1) return gui_main(argc, argv);
+ #endif
+   char player_name[GC_PLAYER_NAME_LENGTH];
+-  char host_name[GC_HOST_NAME_SIZE];
+-  int port;
++  char host_name[NI_MAXHOST];
++  char port[NI_MAXSERV];
+   int mode = 0;
+   int height = -1, width = -1;
+   
+   player_name[0] = '\0';
++  host_name[0] = '\0';
++  port[0] = '\0';
++  
+   parseCommandLine(argc, argv, mode, port, host_name, player_name, height, width);
+   run_crack_attack(mode, port, host_name, player_name, height, width);
+ 
+@@ -109,7 +113,7 @@
+ 
+ void run_crack_attack (
+     int mode, 
+-    int port, 
++    char *port, 
+     char *host_name, 
+     char *player_name,
+     int width,
+@@ -159,7 +163,7 @@
+ #endif
+ }
+ 
+-void parseCommandLine ( int argc, char **argv, int &mode, int &port,
++void parseCommandLine ( int argc, char **argv, int &mode, char *port,
+  char *host_name, char *player_name , int &height, int &width )
+ {
+   for (int n = 1; argv[n]; n++) {
+@@ -172,9 +176,9 @@
+ 
+       mode |= CM_SERVER;
+       if (argv[n + 1] && argv[n + 1][0] != '-')
+-        port = atoi(argv[++n]);
++          strncpy(port, argv[++n], NI_MAXSERV);
+       else
+-        port = 0;
++          strncpy(port, "0", NI_MAXSERV);
+ 
+     } else if (!strcmp(argv[n], "-1") || !strcmp(argv[n], "--solo")) {
+       if (mode & (CM_SERVER | CM_CLIENT | CM_SOLO)) usage();
+@@ -227,12 +231,12 @@
+       if (mode & (CM_SERVER | CM_CLIENT | CM_SOLO)) usage();
+ 
+       mode |= CM_CLIENT;
+-      strncpy(host_name, argv[n], GC_HOST_NAME_SIZE);
++      strncpy(host_name, argv[n], NI_MAXHOST);
+ 			++n;
+ 			if (n < argc) {
+-				port = atoi(argv[n]);
++                strncpy(port, argv[n], NI_MAXSERV);
+ 			} else {
+-				port = 0;
++                strncpy(port, "0", NI_MAXSERV);
+ 				cerr << "No port specified.\n";
+ 				usage();
+ 			}		
+Index: src/Attack.h
+===================================================================
+--- src/Attack.h
++++ src/Attack.h	2005-08-04 20:11:22.000000000 +0200
+@@ -31,9 +31,9 @@
+ 
+ using namespace std;
+ 
+-void run_crack_attack (int mode, int port, char *host_name, char *player_name, int width, int height);
++void run_crack_attack (int mode, char* port, char *host_name, char *player_name, int width, int height);
+ void usage (   );
+-void parseCommandLine ( int argc, char **argv, int &mode, int &port,
++void parseCommandLine ( int argc, char **argv, int &mode, char* port,
+  char *host_name, char player_name[GC_PLAYER_NAME_LENGTH], int &height,
+  int &width);
+ void setupLocalDataDirectory (   );
+Index: src/Communicator.cxx
+===================================================================
+--- src/Communicator.cxx
++++ src/Communicator.cxx	2005-08-04 20:39:39.000000000 +0200
+@@ -31,6 +31,7 @@
+ #include <iostream>
+ #include <sys/types.h>
+ #include <cstring>
++#include <errno.h>
+ 
+ #ifndef _WIN32
+ #  include <unistd.h>
+@@ -106,7 +107,7 @@
+   }
+ }
+ 
+-void Communicator::initialize ( int mode, int port, char host_name[256],
++void Communicator::initialize ( int mode, char* port, char *host_name,
+  char player_name[GC_PLAYER_NAME_LENGTH] )
+ {
+   comm_link_active = false;
+@@ -120,28 +121,85 @@
+   }
+ #endif
+ 
+-  if (port == 0)
+-    port = CO_DEFAULT_PORT;
+-
++  if (port[0] == '\0')
++    strncpy(port, CO_DEFAULT_PORT, NI_MAXSERV);
+   switch (mode & (CM_SERVER | CM_CLIENT)) {
+-  case CM_SERVER: {
+-    int connection_socket = socket(AF_INET, SOCK_STREAM, 0);
++      case CM_SERVER: {
++                          struct addrinfo hints, *res, *ressave;
++                          struct sockaddr_storage address;
++
++                          int error, ReUseAddr = 1;
++                          int connection_socket = -1;
++
++                          /* Clear the hints variable */
++                          memset(&hints, 0, sizeof(hints));
++
++                          /*
++                           * AI_PASSIVE flag: the resulting address is used to bind
++                           * to a socket for accepting incoming connections.
++                           * So, when the hostname==NULL, getaddrinfo function will
++                           * return one entry per allowed protocol family containing
++                           * the unspecified address for that family.
++                           */
++                          hints.ai_flags = AI_PASSIVE;
++                          hints.ai_family = AF_UNSPEC;
++                          hints.ai_socktype = SOCK_STREAM;
++
++                          if(host_name[0] == '\0')
++                              error = getaddrinfo(NULL, port, &hints, &res);
++                          else
++                              error = getaddrinfo(host_name, port, &hints, &res);
++
++                          if (error != 0)
++                          {
++                              /* handle getaddrinfo error */
++                              cerr << "Error in getaddrinfo(). host_name: " << host_name << endl;
++                              exit(1);
++                          }
++
++                          ressave=res;
++
++                          /*
++                           * Try open socket with each address getaddrinfo returned,
++                           * until getting a valid listening socket.
++                           */
++                          while (res)
++                          {
++                              /* create socket */
++                              connection_socket = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
++                              if (connection_socket >= 0)
++                              {
+ 
+-    sockaddr_in address;
+ #ifndef _WIN32
+-    int val = 1;
+-    setsockopt (connection_socket, SOL_SOCKET, SO_REUSEADDR, &val, sizeof (int));
++        /* allow it to always reuse the same port */
++        ReUseAddr = 1;
++        setsockopt(connection_socket, SOL_SOCKET,
++                   SO_REUSEADDR, &ReUseAddr, sizeof(ReUseAddr));  
+ #endif
+-    address.sin_family = AF_INET;
+-    address.sin_addr.s_addr = htonl(INADDR_ANY);
+-    address.sin_port = htons(port);
+ 
+-    if (bind(connection_socket, (sockaddr *) &address, sizeof(address)) < 0) {
+-      cerr << "Port " << port << " is busy." << endl;
+-      exit(1);
++
++        if (bind(connection_socket, res->ai_addr, res->ai_addrlen) == 0)
++          break;
++       
++        cerr << "Port " << port << " is busy." << endl;
++        exit(1);
++
++        close(connection_socket);
++        connection_socket=-1;
++      }
++      res = res->ai_next;
+     }
+ 
+-    cout << "Waiting for connection at port " << port << "..." << endl;
++
++    getnameinfo(res->ai_addr, res->ai_addrlen,
++                host_name, NI_MAXHOST, port, NI_MAXSERV,
++                NI_NUMERICHOST | NI_NUMERICSERV);
++
++    freeaddrinfo(ressave);
++
++    cout << "Waiting for connection on " << host_name << " at port " << port << "..." << endl;
++
++
+     listen(connection_socket, 1);
+ 
+ #ifndef _WIN32
+@@ -162,7 +220,18 @@
+ #else
+     int length = sizeof(address);
+ #endif
+-    comm_link = accept(connection_socket, (sockaddr *) &address, &length);
++
++    /* take care: accept is a "slow" system call */
++    accept_again:
++    if ((comm_link = accept(connection_socket, (struct sockaddr *) &address, &length)) < 0)
++      {
++      if (errno == EINTR)
++        goto accept_again;
++      else
++        cerr << "Error in accept()" << endl;
++    }
++
++    
+     comm_link_active = true;
+ 
+     // check version id
+@@ -186,31 +255,65 @@
+     // available symmetry breaking term
+     win_ties = true;
+ 
+-    cout << "Connection made by " << inet_ntoa(address.sin_addr) << '.' << endl;
++    char clientname[NI_MAXHOST];
++    memset(clientname, 0, sizeof(clientname));
++
++    getnameinfo((struct sockaddr *)&address, length,
++                clientname, sizeof(clientname),
++                port, sizeof(port),
++                NI_NUMERICHOST);
++
++    cout << "Connection made by " <<  clientname << '.' << endl;    
+     break;
+ 
+   } 
+   case CM_CLIENT: {
+-    comm_link = socket(AF_INET, SOCK_STREAM, 0);
+-    comm_link_active = true;
+-
+-#ifdef DEVELOPMENT
+-    cout << "Hostname: " << host_name << endl;
+-#endif
+-    hostent *host = gethostbyname(host_name);
+-    if (!host) {
+-      cerr << "Host '" << host_name << "' not found." << endl;
++    struct addrinfo hints, *res, *ressave;
++    struct sockaddr_storage address;
++    int error;
++
++    cerr << "Port: " << port << endl;
++    /* Clear the hints variable */
++    memset(&hints, 0, sizeof(hints));
++
++    hints.ai_family = AF_UNSPEC;
++    hints.ai_socktype = SOCK_STREAM;
++
++    cerr << host_name << endl;
++
++    error = getaddrinfo(host_name, port, &hints, &res);
++    if (error != 0)
++    {
++      /* handle getaddrinfo error */
++      cerr << "Error in getaddrinfo()." << endl;
++      perror(gai_strerror(error));
+       exit(1);
+     }
+ 
+-    sockaddr_in address;
+-    address.sin_family = AF_INET;
+-    address.sin_addr = *(struct in_addr *) host->h_addr;
+-    address.sin_port = htons((short) port);
+-    if (connect(comm_link, (sockaddr *) &address, sizeof(address)) < 0) {
+-      cerr << "Connection failed. Unable to connect to address." << endl;
+-      exit(1);
++    cerr << "Connecting to " << host_name << endl;
++
++    /*
++     * Try open socket with each address getaddrinfo returned,
++     * until getting a valid connection on the socket.
++     */
++    ressave=res;
++    while (res)
++    {
++      /* create socket */
++      comm_link = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
++      if (comm_link >= 0)
++      {
++
++        if (connect(comm_link, res->ai_addr, res->ai_addrlen) == 0)
++          break;
++       
++        cerr << "Connection failed. Unable to connect to address." << endl;
++        close(comm_link);
++        comm_link=-1;
++      }
++      res = res->ai_next;
+     }
++    freeaddrinfo(ressave);
+ 
+     // check version id
+     uint32 version_id = CO_TEST_INT;
+@@ -238,8 +341,8 @@
+     // for simplicity, client loses ties - but don't tell anyone
+     win_ties = false;
+ 
+-    cout << "Connection made to " << inet_ntoa(address.sin_addr) << ':'
+-     << (short) port << '.' << endl;
++    cout << "Connection made to " << host_name << ':'
++     <<  port << '.' << endl;
+     break;
+   } }
+ 
+Index: src/Communicator.h
+===================================================================
+--- src/Communicator.h
++++ src/Communicator.h	2005-08-04 20:37:43.000000000 +0200
+@@ -41,7 +41,7 @@
+ #include "Game.h"
+ 
+ // default communication port
+-#define CO_DEFAULT_PORT                          (8080)
++#define CO_DEFAULT_PORT                          "8080"
+ 
+ // seconds before server time out due to no connection
+ #define CO_SERVER_TIME_OUT                       (30)
+@@ -77,7 +77,7 @@
+ 
+ /* static */ class Communicator {
+ public:
+-  static void initialize ( int mode, int port, char host_name[256],
++  static void initialize ( int mode, char* port, char *host_name,
+    char player_name[GC_PLAYER_NAME_LENGTH] );
+   static void gameStart (   );
+   static void gameFinish (   );
+Index: src/gtk-gui/interface.cxx
+===================================================================
+--- src/gtk-gui/interface.cxx
++++ src/gtk-gui/interface.cxx	2005-08-04 20:12:54.000000000 +0200
+@@ -225,7 +225,7 @@
+   gtk_widget_show (lblTmpServerAddress);
+   gtk_box_pack_start (GTK_BOX (vbox7), lblTmpServerAddress, FALSE, FALSE, 0);
+ 
+-  lblServerAddress = gtk_label_new ("127.0.0.1");
++  lblServerAddress = gtk_label_new ("::1");
+   gtk_widget_set_name (lblServerAddress, "lblServerAddress");
+   gtk_widget_show (lblServerAddress);
+   gtk_box_pack_start (GTK_BOX (vbox7), lblServerAddress, FALSE, FALSE, 0);
