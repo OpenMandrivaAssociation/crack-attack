@@ -1,7 +1,4 @@
 sources:
-  "crack-attack-1.1.10-man6-page.bz2:"	4578dce4846ff9016df5ae3d7c0835fd42e1ae15
-  "crack-attack-1.1.14.tar.bz2:"	3d70ca7ceae667134415788b5c222437654b3102
-  "crack-attack-16.png:"	37bf6fff3f2402c61848f80f3a75c460878cb5eb
-  "crack-attack-32.png:"	ef982076980473cb85661f4120f01e7f8140bea8
-  "crack-attack-48.png:"	b4c20ec9df1184d74ef6980b61012f395ce421e1
-  "crack-attack-scripts.tar.bz2:"	9e180035974e5863acc8d07de7f39d3483861f93
+  "crack-attack-1.1.10-man6-page.bz2": 4578dce4846ff9016df5ae3d7c0835fd42e1ae15
+  "crack-attack-1.1.14.tar.bz2": 3d70ca7ceae667134415788b5c222437654b3102
+  "crack-attack-scripts.tar.bz2": 9e180035974e5863acc8d07de7f39d3483861f93
