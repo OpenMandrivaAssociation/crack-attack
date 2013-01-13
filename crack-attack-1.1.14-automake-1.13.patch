@@ -1,0 +1,11 @@
+--- crack-attack-1.1.14/configure.ac.bero	2013-01-13 01:13:45.086675439 +0100
++++ crack-attack-1.1.14/configure.ac	2013-01-13 01:13:51.669599722 +0100
+@@ -3,7 +3,7 @@ AC_PREREQ(2.59)
+ AC_INIT(crack-attack,1.1.14,lorien420@myrealbox.com)
+ AC_CONFIG_SRCDIR(src/Attack.cxx)
+ AM_INIT_AUTOMAKE
+-AM_CONFIG_HEADER(src/config.h)
++AC_CONFIG_HEADERS([src/config.h])
+ 
+ dnl Checks for programs.
+ AC_PROG_CC
