@@ -24,6 +24,7 @@ BuildRequires:	pkgconfig(gtk+-2.0)
 BuildRequires:	pkgconfig(SDL_mixer)
 BuildRequires:	pkgconfig(sdl)
 BuildRequires:	pkgconfig(xmu)
+BuildRequires:	pkgconfig(glu)
 Requires:	zenity
 Suggests:	crack-attack-music
 Suggests:	crack-attack-sounds
