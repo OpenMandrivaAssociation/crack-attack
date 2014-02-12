@@ -41,8 +41,7 @@ based on the Super Nintendo classic Tetris Attack.
 # http://lists.gnu.org/archive/html/crack-attack-devel/2005-05/msg00002.html
 %patch4 -p0
 %patch5 -p1 -b .gcc43
-# This patch will be needed after we switch to freeglut:
-#%patch6 -p1
+%patch6 -p1
 bzcat %{SOURCE5} > doc/crack-attack.6
 
 sed -i -e "s|^CXXFLAGS.*|CXXFLAGS = $RPM_OPT_FLAGS -DNDEBUG|" src/Makefile*
