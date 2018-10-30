@@ -1,7 +1,7 @@
 Summary:	Tetris like game
 Name:		crack-attack
 Version:	1.1.14
-Release:	31
+Release:	32
 Group:		Games/Arcade
 License:	GPL
 Url:		http://www.nongnu.org/crack-attack/
