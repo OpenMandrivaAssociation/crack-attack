@@ -1,7 +1,7 @@
 Summary:	Tetris like game
 Name:		crack-attack
 Version:	1.1.14
-Release:	32
+Release:	33
 Group:		Games/Arcade
 License:	GPL
 Url:		http://www.nongnu.org/crack-attack/
@@ -25,10 +25,11 @@ BuildRequires:	pkgconfig(SDL_mixer)
 BuildRequires:	pkgconfig(sdl)
 BuildRequires:	pkgconfig(xmu)
 BuildRequires:	pkgconfig(glu)
+BuildRequires:	pkgconfig(xi)
 
 Requires:	zenity
-Suggests:	crack-attack-music
-Suggests:	crack-attack-sounds
+Recommends:	crack-attack-music
+Recommends:	crack-attack-sounds
 
 %description
 'Crack Attack!' is a free OpenGL game
@@ -49,14 +50,14 @@ sed -i -e "s|^CXXFLAGS.*|CXXFLAGS = $RPM_OPT_FLAGS -DNDEBUG|" src/Makefile*
 autoreconf -fi
 
 %build
-%configure2_5x \
+%configure \
 	--bindir=%{_gamesbindir} \
 	--datadir=%{_gamesdatadir} \
 	--enable-sound
-%make
+%make_build
 
 %install
-%makeinstall_std
+%make_install
 
 install -D -m 755 crack-attack-{solo,create-server,join-server} %{buildroot}%{_gamesbindir}/
 
