@@ -4,7 +4,7 @@ Version:	1.1.14
 Release:	34
 Group:		Games/Arcade
 License:	GPL
-Url:		http://www.nongnu.org/crack-attack/
+Url:		https://www.nongnu.org/crack-attack/
 Source0:	http://savannah.nongnu.org/download/crack-attack/%{name}-%{version}.tar.bz2
 Source11:	%{name}-48.png
 Source12:	%{name}-32.png
