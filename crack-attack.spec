@@ -18,6 +18,11 @@ Patch4:		crack-attack-1.1.14-ipv6-patch
 Patch5:		crack-attack-1.1.14-gcc43.patch
 Patch6:		crack-attack-1.1.14-freeglut-init.patch
 
+BuildRequires:	autoconf
+BuildRequires:	automake
+BuildRequires:	libtool-base
+BuildRequires:	slibtool
+BuildRequires:	make
 BuildRequires:	pkgconfig(gl)
 BuildRequires:	pkgconfig(glut)
 BuildRequires:	pkgconfig(gtk+-2.0)
